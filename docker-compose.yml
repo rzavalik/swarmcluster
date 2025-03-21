@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  jokepresentation:
+    image: 588738580149.dkr.ecr.us-east-1.amazonaws.com/master-ecr/jokepresentation-latest
+    deploy:
+      replicas: 4
+      placement:
+        constraints: [node.role == worker]
+    environment:
+      - JokeProvider__Url=http://jokeprovider:5000/
+    networks:
+      - joke_overlay
+    ports:
+      - "80:80"
+
+  jokeprovider:
+    image: 588738580149.dkr.ecr.us-east-1.amazonaws.com/master-ecr/jokeprovider-latest
+    deploy:
+      replicas: 4
+      placement:
+        constraints: [node.role == worker]
+    networks:
+      - joke_overlay
+    expose:
+      - "5000"
+
+networks:
+  joke_overlay:
+    driver: overlay
+    attachable: true

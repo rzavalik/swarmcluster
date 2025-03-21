@@ -1,0 +1,49 @@
+﻿@{
+	ViewData["Title"] = "Piada do Dia";
+}
+<div class="text-center">
+	<h1 class="display-4">Que tal uma piada?</h1>
+	<br />
+	<br />
+	<figure class="p-5 mb-4 rounded-3" style="border:1px solid #ccc">
+		<blockquote class="blockquote">
+			<p class="lead" id="joke"><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>&nbsp;Carregando...</p>
+		</blockquote>
+		<figcaption class="blockquote-footer">
+			<cite id="joke-source">...</cite>
+		</figcaption>
+	</figure>
+	<br />
+	<br />
+	<button id="reload" type="button" class="btn btn-primary small" onclick="loadJoke()" style="--bs-btn-padding-y: .25rem; --bs-btn-padding-x: .5rem; --bs-btn-font-size: .75rem;">
+		<span class="bi bi-arrow-clockwise"></span> Nova Piada
+	</button>
+</div>
+@section Scripts {
+	<script type="text/javascript">
+		function loadJoke() {
+			setLoading();
+			try{
+				$.get("/joke", function (data) {
+					$("#joke").html(data.joke);
+					$("#joke-source").html(data.server);
+					$('#reload').prop('disabled', false);
+				});
+			} catch {
+				$("#joke").html('Erro ao carregar a piada.');
+				$("#joke-source").html('');
+				$('#reload').prop('disabled', false);
+			}
+		};
+
+		function setLoading() {
+			$("#joke").html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>&nbsp;Carregando...');
+			$("#joke-source").html('...');
+			$('#reload').prop('disabled', true);
+		}
+
+		$(document).ready(function () {
+			loadJoke();
+		});
+	</script>
+}
