@@ -290,6 +290,7 @@ resource "aws_instance" "swarm_node_1" {
               sudo apt install -y docker-compose
 
               sudo wget https://raw.githubusercontent.com/rzavalik/swarmcluster/refs/heads/master/swarm/docker-compose.yml
+              sudo wget https://raw.githubusercontent.com/rzavalik/swarmcluster/refs/heads/master/swarm/start.sh
               EOF
 
   depends_on = [aws_security_group.swarmallow_sg]
