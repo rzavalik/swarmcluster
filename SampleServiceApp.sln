@@ -17,7 +17,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "swarm", "swarm", "{45FA18C4-9F5A-4FD0-8F40-AB8392448458}"
 	ProjectSection(SolutionItems) = preProject
 		swarm\docker-compose.yml = swarm\docker-compose.yml
-		start.sh = start.sh
+		swarm\start.sh = swarm\start.sh
 	EndProjectSection
 EndProject
 Global
