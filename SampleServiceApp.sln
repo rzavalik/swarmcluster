@@ -14,6 +14,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "terraform", "terraform", "{
 		terraform\variables.tf = terraform\variables.tf
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "swarm", "swarm", "{45FA18C4-9F5A-4FD0-8F40-AB8392448458}"
+	ProjectSection(SolutionItems) = preProject
+		swarm\docker-compose.yml = swarm\docker-compose.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
