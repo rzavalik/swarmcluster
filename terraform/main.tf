@@ -93,12 +93,12 @@ resource "aws_security_group" "swarmallow_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # Allow all ports and protocols inside the VPC
+  # Allow all ports and protocols inside Subnet A and Subnet B
   ingress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = [aws_vpc.new_vpc.cidr_block]
+    cidr_blocks = [aws_subnet.subnet_a.cidr_block, aws_subnet.subnet_b.cidr_block]
   }
 
   egress {
