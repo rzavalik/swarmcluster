@@ -143,7 +143,8 @@ resource "aws_iam_policy" "swarm_ecr_policy" {
           "ecr:BatchCheckLayerAvailability",
           "ecr:GetRepositoryPolicy",
           "ecr:BatchGetImage",
-          "ecr:ListImages"
+          "ecr:ListImages",
+          "ecr:GetDownloadUrlForLayer
         ]
         Resource = "*"
       }

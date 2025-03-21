@@ -2,11 +2,13 @@ version: '3.8'
 
 services:
   jokepresentation:
-    image: 588738580149.dkr.ecr.us-east-1.amazonaws.com/master-ecr/jokepresentation-latest
+    image: 588738580149.dkr.ecr.us-east-1.amazonaws.com/master-ecr:jokepresentation-latest
     deploy:
       replicas: 4
       placement:
         constraints: [node.role == worker]
+        preferences:
+          - spread: "node.id"
     environment:
       - JokeProvider__Url=http://jokeprovider:5000/
     networks:
@@ -15,11 +17,13 @@ services:
       - "80:80"
 
   jokeprovider:
-    image: 588738580149.dkr.ecr.us-east-1.amazonaws.com/master-ecr/jokeprovider-latest
+    image: 588738580149.dkr.ecr.us-east-1.amazonaws.com/master-ecr:jokeprovider-latest
     deploy:
       replicas: 4
       placement:
         constraints: [node.role == worker]
+        preferences:
+          - spread: "node.id"
     networks:
       - joke_overlay
     expose:
