@@ -163,6 +163,35 @@ resource "aws_iam_role" "swarm_ec2_role" {
   })
 }
 
+# Attach a policy to the role to allow ECR access
+resource "aws_iam_policy" "swarm_ecr_policy" {
+  name        = "SwarmECRPolicy"
+  description = "Allows EC2 instances to pull images from ECR"
+  
+  # Policy to allow access to ECR actions
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = [
+          "ecr:GetAuthorizationToken",
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:GetRepositoryPolicy",
+          "ecr:BatchGetImage"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+# Attach the ECR access policy to the EC2 role
+resource "aws_iam_role_policy_attachment" "swarm_ec2_role_policy" {
+  role       = aws_iam_role.swarm_ec2_role.name
+  policy_arn = aws_iam_policy.swarm_ecr_policy.arn
+}
+
 resource "aws_iam_instance_profile" "swarm_ec2_instance_profile" {
   name = "swarm-ec2-instance-profile"
   role = aws_iam_role.swarm_ec2_role.name
@@ -249,10 +278,18 @@ resource "aws_instance" "swarm_node_1" {
               sudo chown ubuntu:ubuntu /home/ubuntu/.ssh/id_rsa
               sudo systemctl restart ssh
 
-              sudo docker swarm init --advertise-addr $(hostname -I | awk '{print $1}')
+              # Autentica na ECR
+              aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 588738580149.dkr.ecr.us-east-1.amazonaws.com
 
+              # Inicializa o cluster Swarm
+              sudo docker swarm init --advertise-addr $(hostname -I | awk '{print $1}')
               SWARM_TOKEN=$(sudo docker swarm join-token worker -q)
               echo "$SWARM_TOKEN" | aws s3 cp - s3://zavalik-terraformstate/swarm-cluster/SwarmToken.txt
+
+              # Instala e faz download do YAML
+              sudo apt install -y docker-compose
+
+              sudo wget https://raw.githubusercontent.com/rzavalik/swarmcluster/refs/heads/master/swarm/docker-compose.yml
               EOF
 
   depends_on = [aws_security_group.swarmallow_sg]
@@ -296,8 +333,13 @@ resource "aws_instance" "swarm_node_2" {
               sudo chown ubuntu:ubuntu /home/ubuntu/.ssh/id_rsa
               sudo systemctl restart ssh
 
+              # Autentica na ECR
+              aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 588738580149.dkr.ecr.us-east-1.amazonaws.com
+
+              # Inicializa o cluster Swarm
               SWARM_TOKEN=$(aws s3 cp s3://zavalik-terraformstate/swarm-cluster/SwarmToken.txt -)
               sudo docker swarm join --token $SWARM_TOKEN ${aws_instance.swarm_node_1.private_ip}:2377
+
               EOF
 
   depends_on = [aws_instance.swarm_node_1, aws_security_group.swarmallow_sg]
@@ -341,8 +383,13 @@ resource "aws_instance" "swarm_node_3" {
               sudo chown ubuntu:ubuntu /home/ubuntu/.ssh/id_rsa
               sudo systemctl restart ssh
 
+              # Autentica na ECR
+              aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 588738580149.dkr.ecr.us-east-1.amazonaws.com
+
+              # Inicializa o cluster Swarm
               SWARM_TOKEN=$(aws s3 cp s3://zavalik-terraformstate/swarm-cluster/SwarmToken.txt -)
               sudo docker swarm join --token $SWARM_TOKEN ${aws_instance.swarm_node_1.private_ip}:2377
+
               EOF
 
   depends_on = [aws_instance.swarm_node_1, aws_security_group.swarmallow_sg]
