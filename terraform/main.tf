@@ -93,54 +93,18 @@ resource "aws_security_group" "swarmallow_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # Allow application ports
+  # Allow all ports and protocols inside the VPC
   ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 5000
-    to_port     = 5000
-    protocol    = "tcp"
-    cidr_blocks = ["10.1.0.0/16"]
-  }
-
-  # Allow Docker Swarm internal communication between nodes
-  ingress {
-    from_port   = 2377
-    to_port     = 2377
-    protocol    = "tcp"
-    cidr_blocks = ["10.1.0.0/16"]
-  }
-
-  ingress {
-    from_port   = 7946
-    to_port     = 7946
-    protocol    = "tcp"
-    cidr_blocks = ["10.1.0.0/16"]
-  }
-
-  ingress {
-    from_port   = 7946
-    to_port     = 7946
-    protocol    = "udp"
-    cidr_blocks = ["10.1.0.0/16"]
-  }
-
-  ingress {
-    from_port   = 4789
-    to_port     = 4789
-    protocol    = "tcp"
-    cidr_blocks = ["10.1.0.0/16"]
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = [aws_vpc.new_vpc.cidr_block]
   }
 
   egress {
     from_port   = 0
-    to_port     = 65535
-    protocol    = "tcp"
+    to_port     = 0
+    protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
@@ -178,7 +142,8 @@ resource "aws_iam_policy" "swarm_ecr_policy" {
           "ecr:GetAuthorizationToken",
           "ecr:BatchCheckLayerAvailability",
           "ecr:GetRepositoryPolicy",
-          "ecr:BatchGetImage"
+          "ecr:BatchGetImage",
+          "ecr:ListImages"
         ]
         Resource = "*"
       }
@@ -264,7 +229,12 @@ resource "aws_instance" "swarm_node_1" {
               sudo apt install -y docker-ce
               sudo systemctl start docker
               sudo systemctl enable docker
+
               sudo usermod -aG docker $USER
+              sudo newgrp docker
+
+              sudo chown root:docker /var/run/docker.sock
+              sudo chmod 660 /var/run/docker.sock
 
               # Instala o AWS CLI
               sudo curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
@@ -279,7 +249,7 @@ resource "aws_instance" "swarm_node_1" {
               sudo systemctl restart ssh
 
               # Autentica na ECR
-              aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 588738580149.dkr.ecr.us-east-1.amazonaws.com
+              sudo aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 588738580149.dkr.ecr.us-east-1.amazonaws.com
 
               # Inicializa o cluster Swarm
               sudo docker swarm init --advertise-addr $(hostname -I | awk '{print $1}')
@@ -303,7 +273,7 @@ resource "aws_instance" "swarm_node_1" {
 resource "aws_instance" "swarm_node_2" {
   ami                    = var.ec2_ami
   instance_type          = "t2.micro"
-  subnet_id              = aws_subnet.subnet_b.id
+  subnet_id              = aws_subnet.subnet_a.id
   vpc_security_group_ids = [aws_security_group.swarmallow_sg.id]
   associate_public_ip_address = true
   iam_instance_profile = aws_iam_instance_profile.swarm_ec2_instance_profile.name
@@ -320,7 +290,12 @@ resource "aws_instance" "swarm_node_2" {
               sudo apt install -y docker-ce
               sudo systemctl start docker
               sudo systemctl enable docker
+
               sudo usermod -aG docker $USER
+              sudo newgrp docker
+
+              sudo chown root:docker /var/run/docker.sock
+              sudo chmod 660 /var/run/docker.sock
 
               # Instala o AWS CLI
               sudo curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
@@ -335,7 +310,7 @@ resource "aws_instance" "swarm_node_2" {
               sudo systemctl restart ssh
 
               # Autentica na ECR
-              aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 588738580149.dkr.ecr.us-east-1.amazonaws.com
+              sudo aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 588738580149.dkr.ecr.us-east-1.amazonaws.com
 
               # Inicializa o cluster Swarm
               SWARM_TOKEN=$(aws s3 cp s3://zavalik-terraformstate/swarm-cluster/SwarmToken.txt -)
@@ -370,7 +345,12 @@ resource "aws_instance" "swarm_node_3" {
               sudo apt install -y docker-ce
               sudo systemctl start docker
               sudo systemctl enable docker
+
               sudo usermod -aG docker $USER
+              sudo newgrp docker
+
+              sudo chown root:docker /var/run/docker.sock
+              sudo chmod 660 /var/run/docker.sock
 
               # Instala o AWS CLI
               sudo curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
@@ -385,7 +365,7 @@ resource "aws_instance" "swarm_node_3" {
               sudo systemctl restart ssh
 
               # Autentica na ECR
-              aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 588738580149.dkr.ecr.us-east-1.amazonaws.com
+              sudo aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 588738580149.dkr.ecr.us-east-1.amazonaws.com
 
               # Inicializa o cluster Swarm
               SWARM_TOKEN=$(aws s3 cp s3://zavalik-terraformstate/swarm-cluster/SwarmToken.txt -)
