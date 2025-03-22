@@ -10,3 +10,5 @@ JokePresentation é exposto através de um Application Load Balancer, que balanc
 
 Foi utilizado um Script baseado em Terraform para criar a VPC, Subnets, instâncias EC2 e Security Groups.
 Depois de montado o Cluster, basta inicializar através do comando docker-compose. Para facilitar, foi criado um arquivo start.sh que já possui os comandos de inicialização.
+
+[http://swarmcluster-joke-lb-539831266.us-east-1.elb.amazonaws.com/]
