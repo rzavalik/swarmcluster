@@ -269,6 +269,8 @@ resource "aws_instance" "swarm_node_1" {
               # Instala e faz download do YAML
               sudo apt install -y docker-compose
 
+              cd ~/
+
               sudo wget https://raw.githubusercontent.com/rzavalik/swarmcluster/refs/heads/master/swarm/docker-compose.yml
               sudo wget https://raw.githubusercontent.com/rzavalik/swarmcluster/refs/heads/master/swarm/start.sh
               EOF
