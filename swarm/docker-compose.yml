@@ -16,6 +16,13 @@ services:
       - joke_overlay
     ports:
       - "80:80"
+    healthcheck:
+      test: ["CMD", "wget", "http://localhost:80/health"]
+      interval: 60s
+      retries: 3  
+      timeout: 10s
+      start_period: 30s
+      disable: false
 
   jokeprovider:
     image: 588738580149.dkr.ecr.us-east-1.amazonaws.com/master-ecr:jokeprovider-latest
@@ -31,6 +38,13 @@ services:
       - joke_overlay
     expose:
       - "5000"
+    healthcheck:
+      test: ["CMD", "wget", "http://localhost:5000/health"]
+      interval: 60s
+      retries: 3  
+      timeout: 10s
+      start_period: 30s
+      disable: false
 
 networks:
   joke_overlay:
