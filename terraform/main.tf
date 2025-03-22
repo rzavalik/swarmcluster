@@ -93,6 +93,14 @@ resource "aws_security_group" "swarmallow_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  # Allow SSH access (port 22) from your IP range
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   # Allow all ports and protocols inside Subnet A and Subnet B
   ingress {
     from_port   = 0
@@ -228,6 +236,7 @@ resource "aws_instance" "swarm_node_1" {
               sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" -y
               sudo apt update -y
               sudo apt install -y docker-ce
+
               sudo systemctl start docker
               sudo systemctl enable docker
 
@@ -289,8 +298,10 @@ resource "aws_instance" "swarm_node_2" {
               sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" -y
               sudo apt update -y
               sudo apt install -y docker-ce
+
               sudo systemctl start docker
               sudo systemctl enable docker
+
 
               sudo usermod -aG docker $USER
               sudo newgrp docker
@@ -344,8 +355,10 @@ resource "aws_instance" "swarm_node_3" {
               sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" -y
               sudo apt update -y
               sudo apt install -y docker-ce
+
               sudo systemctl start docker
               sudo systemctl enable docker
+
 
               sudo usermod -aG docker $USER
               sudo newgrp docker

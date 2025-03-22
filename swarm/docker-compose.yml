@@ -11,6 +11,7 @@ services:
           - spread: "node.id"
     environment:
       - JokeProvider__Url=http://jokeprovider:5000/
+      - ASPNETCORE_URLS=http://0.0.0.0:80
     networks:
       - joke_overlay
     ports:
@@ -24,6 +25,8 @@ services:
         constraints: [node.role == worker]
         preferences:
           - spread: "node.id"
+    environment:
+      - ASPNETCORE_URLS=http://0.0.0.0:5000
     networks:
       - joke_overlay
     expose:
